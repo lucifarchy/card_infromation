@@ -1,0 +1,32 @@
+name: Monthly Scraper
+
+on:
+  schedule:
+    - cron: '0 0 1 * *'  # 매월 1일 실행
+  workflow_dispatch:      # 수동 실행 버튼 추가
+
+permissions:
+  contents: write
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@latest
+      - name: Install libraries
+        run: pip install pandas selenium webdriver-manager
+      - name: Run scraper
+        run: python scraper.py
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "Auto Bot"
+          git config --global user.email "bot@noreply.github.com"
+          git add benefits.csv
+          git commit -m "Update data" || exit 0
+          git push
